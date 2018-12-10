@@ -1,12 +1,10 @@
-let chart = null;
-let datetime = [];
-let issueData = [];
+var chart = null;
 
-const OPEN_ISSUES = 0,
-    CLOSE_ISSUES = 1;
+const OPEN_ISSUES = 0, CLOSE_ISSUES = 1;
+const DATETIME = 0, ISSUES = 1, BOTH = 2;
 
 $(document).ready(function () {
-
+    createChart();
     firebaseInit();
     getData();
 });
@@ -15,44 +13,47 @@ $(document).ready(function () {
 async function getData() {
 
     let data = await pullFromFirebase();
-    filterDateTime(data, 10);
-    filterIssuesData(data, OPEN_ISSUES);
+    
+    const issueData = filterIssuesData(data, ISSUES);
+    let datetime = filterIssuesData(data, DATETIME);
 
-    console.table(datetime);
-
-    createChart();
-}
-
-
-/**
- * Parse timestamp to human date time
- * @param {data} data data All data from Database
- * @param {day} days Number of days to be reversed to
- */
-function filterDateTime(data, days) {
-
-    datetime = data.filter(function (iss) {
-        return new Date() - (1000 * 60 * 60 * 24 * days) < new Date(iss.timestamp);
-    }).map(issue => {
-        return new Date(issue.timestamp).toLocaleString();
+    let openedIssues = issueData.map(issue => {
+        return issue.open;
     });
+
+    let closedIssues = issueData.map(issue => {
+        return issue.close;
+    });
+
+    notifyChart(openedIssues, closedIssues, datetime);
+    setTodayStatistics(data);
 }
 
 /**
- * Filter OPEN or CLOSE data depends on:
+ * Filter date depends on:
  * @param {data} data All data from Database
- * @param {*} variant OPEN or CLOSE issue
+ * @param {openIssues} variant OPEN or CLOSE issue
+ * @param {days} number of days to go back
+ * @param {variant} DATETIME, ISSUES or BOTH
  */
-function filterIssuesData(data, variant) {
+function filterIssuesData(data, variant, days = 10) {
 
-    issueData = data.filter(function (iss) {
-        return new Date() - (1000 * 60 * 60 * 24 * 10) < new Date(iss.timestamp);
+    const returnData = data.filter(function (iss) {
+        return new Date() - (1000 * 60 * 60 * 24 * days) < new Date(iss.timestamp);
+    }).filter(function (_, index, _) {
+        return index % 24 == 0;
     }).map(issue => {
-        return variant === OPEN_ISSUES ? issues.open : issue.close;
+        switch (variant) {
+            case DATETIME:
+                return new Date(issue.timestamp).toLocaleString();
+            case ISSUES:
+                return { open: issue.open, close: issue.close };
+            default: return { datetime: new Date(issue.timestamp).toLocaleString(), open: issue.open, close: issue.close }
+        }
     });
+
+    return returnData;
 }
-
-
 
 // Get data from Firebase Database
 pullFromFirebase = () => {
@@ -90,10 +91,10 @@ function createChart() {
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: datetime,
+            labels: [],
             datasets: [{
-                label: '# of Open issues',
-                data: issueData,
+                label: '# of OPENED issues',
+                data: [],
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.2)',
                 ],
@@ -101,17 +102,60 @@ function createChart() {
                     '#45B3F1'
                 ],
                 borderWidth: 1
-            }]
+            },
+            {
+                label: '# of CLOSED issues',
+                data: [],
+                hidden: true,
+                backgroundColor: [
+                    '#EF9A9A',
+                ],
+                borderColor: [
+                    '#D32F2F'
+                ],
+                borderWidth: 1
+            }
+            ]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Number of issues'
+                    },
                     ticks: {
-                        beginAtZero: true
+                        major: {
+                            fontStyle: 'bold',
+                            fontColor: '#FF0000'
+                        }
                     }
                 }]
             }
         }
     });
+}
+
+// Set data to chart 
+function notifyChart(openedIssues, closedIssues, datetime) {
+    chart.data.datasets[0].data = openedIssues;
+    chart.data.datasets[1].data = closedIssues;
+    chart.data.labels = datetime;
+    chart.update();
+}
+
+// Set statistics on the top of the page
+function setTodayStatistics(data) {
+
+    const statsAll = filterIssuesData(data, BOTH, 2);
+
+    const opened = statsAll[1].open - statsAll[0].open;
+    const closed = statsAll[1].close - statsAll[0].close;
+    let wasWere = (opened === 1) ? "was" : "were";
+
+    const text = `In the last 24 hours ${wasWere} <i class="tiny material-icons blue-text">arrow_upward</i> opened ${opened}  and <i class="tiny material-icons red-text">arrow_downward</i> closed ${closed} issues.`
+    $('#today-stats').prepend(text);
 }
 

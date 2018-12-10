@@ -1,6 +1,12 @@
 @charset "UTF-8";
+
 .materialize-red {
   background-color: #e51c23 !important;
+}
+
+.material-icons {
+  vertical-align: middle !important;
+  padding-bottom: 3px;
 }
 
 .materialize-red-text {

@@ -8,41 +8,50 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta keywords="" />
-    <title>Flutter Issues</title>
+    <meta keywords="Tracking Flutter Github issues" />
+    <title>Flutter Issue Tracker</title>
     <meta name="description" content="Tracker of Flutter issues on GitHub">
     <meta name="keywords" content="Flutter, Flutter issues, Github, Flutter developer">
 
     <link rel="stylesheet" href="css/materialize.css" />
 
+    <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-database.js"></script>
 
+    <!-- MATERIALIZE -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js" integrity="sha384-ZOED+d9HxogEQwD+jFvux96iGQR9TxfJO+mPF2ZS0TuKH6eWrmvPsDpO6I0OWdiX"
         crossorigin="anonymous"></script>
 
+    <!-- CHART JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js" integrity="sha384-2Qwf015yMsTznxILN0IWyu6gwvn/Zw+ujd9RqzoFTAPBa8z99M4VcuA1i4WJdOOq"
         crossorigin="anonymous"></script>
 
+    <!-- GENERAL -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
         crossorigin="anonymous"></script>
-
     <script src="./js/app.js"></script>
 
 </head>
 
 <body>
     <!-- Navigation panel -->
-    <nav>
-        <div class="nav-wrapper">
-            <a href="index.html" class="brand-logo left"><img class="center-align" id="logo" src="./assets/flutter-logo.png"
-                    style="height:30px; height: 30px; padding: 5px 20px 0 0" />Flutter issues</a>
-        </div>
-    </nav>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="index.html" class="brand-logo left"><img class="center-align" id="logo" src="./assets/flutter-logo.png"
+                        style="height:30px; height: 30px; padding: 5px 20px 0 0" />Flutter Issue Tracker</a>
+            </div>
+        </nav>
+    </div>
 
     <!-- Chart -->
-    <main>
-        <canvas id="chart" style="height: 1000vh; padding: 30px"></canvas>
+    <main style="height: 90vh; padding-bottom: 50px">
+
+        <h5 id="today-stats" class="center">
+            </h3>
+            <canvas id="chart" style="padding: 30px"></canvas>
     </main>
 
     <!-- Footer -->
@@ -50,14 +59,17 @@
         <div class="container center">
             <div class="row">
                 <div class="col l12 s12">
-                    <h5 class="white-text center"></h5>
-                    <p class="grey-text text-lighten-4">All rights reserved. <br> You can find the code on <a href="https://github.com/stepanzalis/flutter_github_issues">GitHub</a></p>
+                    <p style="margin: 0" class="grey-text text-lighten-4">MIT licence</p>
+                    <p style="margin: 10px 0 0 0" class="grey-text text-lighten-4">You can find the <i class="tiny material-icons">code</i>
+                        on <a href="https://github.com/stepanzalis/flutter_github_issues">GitHub.</a></p>
+                    <p style="margin: 0" class="grey-text text-lighten-5"><i class="tiny material-icons">show_chart</i>
+                        Charts are drawn using <a href="https://www.chartjs.org/">ChartJS</a></p>
                 </div>
             </div>
         </div>
         <div class="footer-copyright">
             <div class="container center-align">
-                © 2018 Copyright Štěpán Záliš
+                © 2018 Created by Štěpán Záliš
             </div>
         </div>
     </footer>
