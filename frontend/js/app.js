@@ -40,8 +40,8 @@ function filterIssuesData(data, variant, days = 10) {
 
     const returnData = data.filter(function (iss) {
         return new Date() - (1000 * 60 * 60 * 24 * days) < new Date(iss.timestamp);
-    }).filter(function (_, index, _) {
-        return index % 24 == 0;
+    }).filter(function (iss) {
+        return new Date(iss.timestamp).getHours() === new Date().getHours();
     }).map(issue => {
         switch (variant) {
             case DATETIME:
@@ -52,7 +52,18 @@ function filterIssuesData(data, variant, days = 10) {
         }
     });
 
+    console.table(returnData)
+
     return returnData;
+}
+
+// Compare data now and yesterday
+function statsData(data) {
+
+    return {
+        "now": data[data.length - 1],
+        "yesterday": data[data.length - 25]
+    }
 }
 
 // Get data from Firebase Database
@@ -149,13 +160,16 @@ function notifyChart(openedIssues, closedIssues, datetime) {
 // Set statistics on the top of the page
 function setTodayStatistics(data) {
 
-    const statsAll = filterIssuesData(data, BOTH, 2);
+    // const statsAll = filterIssuesData(data, BOTH, 2);
 
-    const opened = statsAll[1].open - statsAll[0].open;
-    const closed = statsAll[1].close - statsAll[0].close;
-    let wasWere = (opened === 1) ? "was" : "were";
+    const stats = statsData(data);
+    
+    var moreOrLess = stats.now > stats.yesterday ? "more" : "less";
+    var icon = stats.now > stats.yesterday ? '<i class="tiny material-icons red-text">arrow_upward</i>' : '<i class="tiny material-icons blue-text">arrow_downward</i>';
 
-    const text = `In the last 24 hours ${wasWere} <i class="tiny material-icons blue-text">arrow_upward</i> opened ${opened}  and <i class="tiny material-icons red-text">arrow_downward</i> closed ${closed} issues.`
+    let issues = Math.abs(stats.now.open - stats.yesterday.open);
+
+    const text = `${icon} ${issues} ${moreOrLess} issues compared to yesterday.`
     $('#today-stats').prepend(text);
 }
 
