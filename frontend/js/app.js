@@ -4,6 +4,11 @@ const OPEN_ISSUES = 0, CLOSE_ISSUES = 1;
 const DATETIME = 0, ISSUES = 1, BOTH = 2;
 
 $(document).ready(function () {
+
+    let elem = document.querySelector('.tabs');
+    var instance = M.Tabs.init(elem, {});
+
+
     createChart();
     firebaseInit();
     getData();
@@ -13,15 +18,15 @@ $(document).ready(function () {
 async function getData() {
 
     let data = await pullFromFirebase();
-    
-    const issueData = filterIssuesData(data, ISSUES);
-    let datetime = filterIssuesData(data, DATETIME);
 
-    let openedIssues = issueData.map(issue => {
+    const issueData = filterIssuesData(data, ISSUES);
+    const datetime = filterIssuesData(data, DATETIME);
+
+    const openedIssues = issueData.map(issue => {
         return issue.open;
     });
 
-    let closedIssues = issueData.map(issue => {
+    const closedIssues = issueData.map(issue => {
         return issue.close;
     });
 
@@ -39,9 +44,11 @@ async function getData() {
 function filterIssuesData(data, variant, days = 10) {
 
     const returnData = data.filter(function (iss) {
-        return new Date() - (1000 * 60 * 60 * 24 * days) < new Date(iss.timestamp);
+        return new Date() - (1000 * 60 * 60 * 24 * days) <= new Date(iss.timestamp);
     }).filter(function (iss) {
-        return new Date(iss.timestamp).getHours() === new Date().getHours();
+        // the cron is starting at XX:42 minutes -> if is after it, we can should latest value
+        const now = new Date().getMinutes() >= 43 ? new Date().getHours() : new Date().getHours() - 1;
+        return new Date(iss.timestamp).getHours() === now;
     }).map(issue => {
         switch (variant) {
             case DATETIME:
@@ -160,16 +167,12 @@ function notifyChart(openedIssues, closedIssues, datetime) {
 // Set statistics on the top of the page
 function setTodayStatistics(data) {
 
-    // const statsAll = filterIssuesData(data, BOTH, 2);
+    const repos = statsData(data);
+    const moreOrLess = repos.now.open > repos.yesterday.open ? "more" : "less";
+    const icon = repos.now.open > repos.yesterday.open ? '<i class="tiny material-icons red-text">arrow_upward</i>' : '<i class="tiny material-icons blue-text">arrow_downward</i>';
+    const issues = Math.abs(repos.now.open - repos.yesterday.open);
 
-    const stats = statsData(data);
-    
-    var moreOrLess = stats.now > stats.yesterday ? "more" : "less";
-    var icon = stats.now > stats.yesterday ? '<i class="tiny material-icons red-text">arrow_upward</i>' : '<i class="tiny material-icons blue-text">arrow_downward</i>';
-
-    let issues = Math.abs(stats.now.open - stats.yesterday.open);
-
-    const text = `${icon} ${issues} ${moreOrLess} issues compared to yesterday.`
-    $('#today-stats').prepend(text);
+    const text = `${icon} ${issues} ${moreOrLess} issues compared to yesterday`
+    // $('#today-stats').prepend(text);
 }
 

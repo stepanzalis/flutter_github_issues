@@ -2,7 +2,7 @@ let admin = require('firebase-admin');
 let fetch = require("node-fetch");
 
 // API KEY
-let serviceAccount = require('./flutter-github-issues-firebase-adminsdk-c7ina-7623c94fc5.json');
+let serviceAccount = require('./flutter-github-issues-firebase-adminsdk-c7ina-bb7ac64db4.json');
 
 // Firebase init
 admin.initializeApp({
@@ -11,7 +11,7 @@ admin.initializeApp({
 });
 
 // Get a database reference to issues
-var db = admin.app().database();
+let db = admin.app().database();
 
 /**
  * @param owner Owner of the repository
@@ -38,9 +38,12 @@ function getBody(state) {
  * @returns Total count of OPEN / CLOSED issues
  */
 function getIssues(body) {
+
+    let url = 'https://api.github.com/graphql';
+
     let options = {
         method: 'POST',
-        url: 'https://api.github.com/graphql',
+        url: url,
         body: body,
         headers: {
             Accept: "application/json",
@@ -49,7 +52,7 @@ function getIssues(body) {
         }
     };
 
-    return fetch('https://api.github.com/graphql', options)
+    return fetch(url, options)
         .then(resp => resp.json())
         .then(data => {
             return data.data.repository.issues.totalCount;
@@ -62,6 +65,7 @@ function getIssues(body) {
  * @param closed Number of closed issues
  */
 function setToDatabase(open, closed) {
+
     let now = Date.now();
     let issues = db.ref("/issues/").child(now);
 
