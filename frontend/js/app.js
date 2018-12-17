@@ -1,76 +1,80 @@
-var chart = null;
 
-const OPEN_ISSUES = 0, CLOSE_ISSUES = 1;
-const DATETIME = 0, ISSUES = 1, BOTH = 2;
+var instance_tabs = null;
+
+let chartToday = null;
+let chartMonth = null;
+let chartTotal = null;
+
+let data = null;
+
+// CONSTANTS
+const TIME = 0; 
+const DATE = 1;
 
 $(document).ready(function () {
 
+    // TABS
     let elem = document.querySelector('.tabs');
-    var instance = M.Tabs.init(elem, {});
+    let init_tab = M.Tabs.init(elem, { onShow: tab_callback });
+    instance_tabs = M.Tabs.getInstance(elem);
 
-
-    createChart();
     firebaseInit();
-    getData();
+    data = getData();
 });
+
+function tab_callback() {
+
+    switch (instance_tabs.index) {
+        case 0:
+            notifyToday();
+            break;
+        case 1:
+            if (chartMonth == null) chartMonth = createChart("#month");
+            let month = otherData(30, 6);
+            notifyChart(chartMonth, month, DATE);
+            break;
+        case 2:
+            if (chartTotal == null) chartTotal = createChart("#total");
+            let days = data.length / 24;
+            let total = otherData(days, 12);
+            notifyChart(chartTotal, total, DATE);
+            break;
+    }
+}
+
+// show today graph after initialization
+function notifyToday() {
+    if (chartToday == null) chartToday = createChart("#today");
+    let today = todayData(data);
+    notifyChart(chartToday, today, TIME);
+}
+
 
 // Main function to parse dat from database
 async function getData() {
+    if (data == null) data = await pullFromFirebase();
+    notifyToday();
+}
 
-    let data = await pullFromFirebase();
-
-    const issueData = filterIssuesData(data, ISSUES);
-    const datetime = filterIssuesData(data, DATETIME);
-
-    const openedIssues = issueData.map(issue => {
-        return issue.open;
+// Get today data
+function todayData() {
+    return data.filter(function (issue) {
+        let now = new Date();
+        let iss = new Date(issue.timestamp);
+        return now.getDate() === iss.getDate() && now.getMonth() === iss.getMonth();
     });
-
-    const closedIssues = issueData.map(issue => {
-        return issue.close;
-    });
-
-    notifyChart(openedIssues, closedIssues, datetime);
-    setTodayStatistics(data);
 }
 
 /**
- * Filter date depends on:
- * @param {data} data All data from Database
- * @param {openIssues} variant OPEN or CLOSE issue
- * @param {days} number of days to go back
- * @param {variant} DATETIME, ISSUES or BOTH
+ * @param days Number of days to be filter
+ * @param skip Filter offset 
  */
-function filterIssuesData(data, variant, days = 10) {
-
-    const returnData = data.filter(function (iss) {
-        return new Date() - (1000 * 60 * 60 * 24 * days) <= new Date(iss.timestamp);
-    }).filter(function (iss) {
-        // the cron is starting at XX:42 minutes -> if is after it, we can should latest value
-        const now = new Date().getMinutes() >= 43 ? new Date().getHours() : new Date().getHours() - 1;
-        return new Date(iss.timestamp).getHours() === now;
-    }).map(issue => {
-        switch (variant) {
-            case DATETIME:
-                return new Date(issue.timestamp).toLocaleString();
-            case ISSUES:
-                return { open: issue.open, close: issue.close };
-            default: return { datetime: new Date(issue.timestamp).toLocaleString(), open: issue.open, close: issue.close }
-        }
+function otherData(days, skip) {
+    return data.filter(function (issue) {
+        return new Date() - (1000 * 60 * 60 * 24 * days) <= new Date(issue.timestamp);
+    }).filter(function (_, index, _) {
+        if (index % skip == 0) return this;
     });
-
-    console.table(returnData)
-
-    return returnData;
-}
-
-// Compare data now and yesterday
-function statsData(data) {
-
-    return {
-        "now": data[data.length - 1],
-        "yesterday": data[data.length - 25]
-    }
 }
 
 // Get data from Firebase Database
@@ -83,9 +87,9 @@ pullFromFirebase = () => {
     });
 }
 
-/** 
-    Firebase config init
-    @return Firebase Database reference of all issues
+/*
+*  Firebase config init
+*  @return Firebase Database reference of all issues
 */
 function firebaseInit() {
 
@@ -102,11 +106,11 @@ function firebaseInit() {
 }
 
 // Draw a chart 
-function createChart() {
+function createChart(chartId) {
 
-    var ctx = $("#chart");
+    var ctx = $(chartId);
 
-    chart = new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'line',
         data: {
             labels: [],
@@ -156,23 +160,20 @@ function createChart() {
     });
 }
 
-// Set data to chart 
-function notifyChart(openedIssues, closedIssues, datetime) {
-    chart.data.datasets[0].data = openedIssues;
-    chart.data.datasets[1].data = closedIssues;
+/**
+ * @param chart Id of chart to bind data
+ * @param dataset Data
+ * @param time show only TIME or DATE (TIME used in today's stats)
+ */
+function notifyChart(chart, dataset, time) {
+
+    let open = dataset.map(issue => issue.open);
+    let closed = dataset.map(issue => issue.close);
+    let datetime = dataset.map(issue => time === TIME ? new Date(issue.timestamp).toLocaleTimeString() : new Date(issue.timestamp).toLocaleDateString());
+
+    chart.data.datasets[0].data = open;
+    chart.data.datasets[1].data = closed;
     chart.data.labels = datetime;
     chart.update();
-}
-
-// Set statistics on the top of the page
-function setTodayStatistics(data) {
-
-    const repos = statsData(data);
-    const moreOrLess = repos.now.open > repos.yesterday.open ? "more" : "less";
-    const icon = repos.now.open > repos.yesterday.open ? '<i class="tiny material-icons red-text">arrow_upward</i>' : '<i class="tiny material-icons blue-text">arrow_downward</i>';
-    const issues = Math.abs(repos.now.open - repos.yesterday.open);
-
-    const text = `${icon} ${issues} ${moreOrLess} issues compared to yesterday`
-    // $('#today-stats').prepend(text);
 }
 
