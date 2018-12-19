@@ -18,6 +18,7 @@
 
     <link rel="stylesheet" href="css/materialize.css" />
     <link rel="icon" type="image/ico" href="favicon.ico" />
+    <noscript>Your browser does not support JavaScript. To show the content right, please enable it!</noscript>
 
 </head>
 
@@ -36,12 +37,23 @@
     </nav>
 
     <!-- Chart -->
-    <main style="height: 90vh; padding-bottom: 50px">
+    <main style="height: 90vh; width:100%;padding-bottom: 50px">
 
-        <h5 id="today-stats" class="center" style="color: #757575"></h5>
         <canvas id="today" style="padding: 30px"></canvas>
         <canvas id="month" style="padding: 30px"></canvas>
         <canvas id="total" style="padding: 30px"></canvas>
+
+        <div id="preloader" class="preloader-wrapper big active loader">
+            <div class="spinner-layer spinner-blue-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div><div class="gap-patch">
+                <div class="circle"></div>
+              </div><div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
     </main>
 
     <!-- Footer -->
