@@ -8,16 +8,16 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta keywords="Tracking Flutter Github issues" />
     <title>Flutter Issue Tracker</title>
-    <meta name="description" content="Tracker of Flutter issues on GitHub">
-    <meta name="keywords" content="Flutter, Flutter issues, Github, Flutter developer">
+    <meta name="description" content="Tracker of Flutter issues on GitHub.">
+    <meta name="keywords" content="flutter, flutter issues, github, flutter bugs">
 
     <!-- MATERIALIZE -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <link rel="stylesheet" href="css/materialize.css" />
     <link rel="icon" type="image/ico" href="favicon.ico" />
+
     <noscript>Your browser does not support JavaScript. To show the content right, please enable it!</noscript>
 
 </head>
@@ -26,8 +26,8 @@
 
     <nav class="nav-extended navbar-fixed">
         <div class="nav-wrapper">
-            <a href="index.html" class="brand-logo left"><img class="center-align" id="logo" src="./assets/flutter-logo.png"
-                    style="height:30px; height: 30px; padding: 5px 20px 0 0" />Flutter Issue Tracker</a>
+            <p  style="margin: 0" class="brand-logo left"><img class="center-align" id="logo" src="./assets/flutter-logo.png"
+                    style="height:30px; height: 30px; padding: 5px 10px 0 0" />Flutter Issue Tracker</p>
         </div>
             <ul class="tabs tabs-transparent tabs-fixed-width">
                 <li class="tab"><a class="active" href="#today">Today</a></li>
@@ -43,6 +43,7 @@
         <canvas id="month" style="padding: 30px"></canvas>
         <canvas id="total" style="padding: 30px"></canvas>
 
+        <!-- Preloader -->
         <div id="preloader" class="preloader-wrapper big active loader">
             <div class="spinner-layer spinner-blue-only">
               <div class="circle-clipper left">
@@ -61,7 +62,7 @@
         <div class="container center">
             <div class="row">
                 <div class="col l12 s12">
-                    <p style="margin: 0" class="grey-text text-lighten-4">MIT licence</p>
+                    <a href="https://github.com/stepanzalis/flutter_github_issues/blob/master/LICENSE"><p style="margin: 0" class="grey-text text-lighten-4">MIT licence</p></a>
                     <p style="margin: 10px 0 0 0" class="grey-text text-lighten-4">You can find the <i class="tiny material-icons">code</i>
                         on <a href="https://github.com/stepanzalis/flutter_github_issues">GitHub.</a></p>
                     <p style="margin: 0" class="grey-text text-lighten-5"><i class="tiny material-icons">show_chart</i>

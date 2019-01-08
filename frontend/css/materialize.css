@@ -24,6 +24,10 @@
   padding-bottom: 3px;
 }
 
+.materialize-red {
+  background-color: #e51c23 !important;
+}
+
 .materialize-red-text {
   color: #e51c23 !important;
 }
@@ -7075,7 +7079,7 @@ input[type=range]::-ms-thumb {
 
 .spinner-blue,
 .spinner-blue-only {
-  border-color: #4285f4;
+  border-color: #45B3F1;
 }
 
 .spinner-red,
